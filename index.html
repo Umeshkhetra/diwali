@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Happy Diwali - Umesh Khetra ✨</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Poppins", sans-serif;
+    background: #050505;
+    color: #fff;
+  }
+
+  .background {
+    position: absolute;
+    inset: 0;
+    background: url('./God-ram-sita-images.jpg') center/cover no-repeat;
+    opacity: 0.35;
+    z-index: 1;
+  }
+
+  #fireworksCanvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  .content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 3;
+    width: 90%;
+    max-width: 600px;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 20px;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+  }
+
+  h1 {
+    color: #ffd166;
+    text-shadow: 0 0 10px #ffb347, 0 0 20px #ffb347;
+    font-size: 2rem;
+  }
+
+  p {
+    color: #eee;
+    margin: 12px 0;
+    font-size: 1rem;
+  }
+
+  .name {
+    color: #ff7b7b;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.5rem; }
+    p { font-size: 0.9rem; }
+    .name { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="background"></div>
+<canvas id="fireworksCanvas"></canvas>
+
+<div class="content">
+  <h1>🌟 शुभ दीपावली 🌟</h1>
+  <p>दीपों की रौशनी से आपका जीवन जगमगाए,<br> और हर अंधेरा आपकी मुस्कान से मिट जाए।✨</p>
+  <div class="name"> Umesh Khetra</div>
+</div>
+
+<audio id="crackerSound" preload="auto">
+  <source src="./fireworks-29629.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const canvas = document.getElementById("fireworksCanvas");
+const ctx = canvas.getContext("2d");
+let W = (canvas.width = window.innerWidth);
+let H = (canvas.height = window.innerHeight);
+const sound = document.getElementById("crackerSound");
+
+window.addEventListener("resize", () => {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+});
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+class Particle {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.speed = rand(2, 8);
+    this.angle = rand(0, Math.PI * 2);
+    this.vx = Math.cos(this.angle) * this.speed;
+    this.vy = Math.sin(this.angle) * this.speed;
+    this.life = 0;
+    this.maxLife = rand(50, 100);
+    this.size = rand(1.5, 3.5);
+  }
+  update() {
+    this.vy += 0.05; // gravity
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life++;
+    this.size *= 0.97;
+    return this.life < this.maxLife;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+}
+
+const fireworks = [];
+
+function createFirework(x, y) {
+  sound.currentTime = 0;
+  sound.play(); // 💥 sound when explode
+  const colors = ["#ff0044", "#00ffcc", "#ffff66", "#ff6600", "#66ff66", "#66ccff"];
+  const particles = [];
+  for (let i = 0; i < 100; i++) {
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    particles.push(new Particle(x, y, color));
+  }
+  fireworks.push(particles);
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+  ctx.fillRect(0, 0, W, H);
+
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    const group = fireworks[i];
+    for (let j = group.length - 1; j >= 0; j--) {
+      const p = group[j];
+      if (!p.update()) group.splice(j, 1);
+      else p.draw();
+    }
+    if (group.length === 0) fireworks.splice(i, 1);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+// Auto fireworks
+setInterval(() => {
+  createFirework(rand(W * 0.2, W * 0.8), rand(H * 0.2, H * 0.5));
+}, 900);
+
+// Tap/Click fireworks
+canvas.addEventListener("click", (e) => {
+  createFirework(e.clientX, e.clientY);
+});
+
+animate();
+</script>
+</body>
+</html>
